@@ -944,6 +944,12 @@ static void on_present(command_queue *, swapchain *swapchain, const rect *, cons
 			info.last_frame_stats = frame_stats;
 			info.last_used_in_frame = device_data->frame_index;
 
+			// Save the last clear count on depth_stencil_backup
+			if (depth_stencil_backup *const depth_stencil_backup = device_data->find_depth_stencil_backup(depth_stencil))
+			{
+				depth_stencil_backup->last_clear_count = static_cast<uint32_t>(info.last_frame_stats.clears.size());
+			}
+
 			if (std::numeric_limits<uint64_t>::max() == info.first_used_in_frame)
 				info.first_used_in_frame = device_data->frame_index;
 		}
@@ -1390,9 +1396,8 @@ static void draw_settings_overlay(effect_runtime *runtime)
 			if (depth_stencil_backup == nullptr || depth_stencil_backup->backup_texture == 0)
 				continue;
 
-			depth_stencil_backup->last_clear_count = static_cast<uint32_t>(info.last_frame_stats.clears.size());
-
-			for (uint32_t clear_index = 1; clear_index <= depth_stencil_backup->last_clear_count; ++clear_index)
+			uint32_t last_clear_count = static_cast<uint32_t>(info.last_frame_stats.clears.size());
+			for (uint32_t clear_index = 1; clear_index <= last_clear_count; ++clear_index)
 			{
 				const clear_stats &clear_stats = info.last_frame_stats.clears[clear_index - 1];
 
