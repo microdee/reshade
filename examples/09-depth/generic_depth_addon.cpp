@@ -1403,6 +1403,8 @@ static void draw_settings_overlay(effect_runtime *runtime)
 			if (!s_count_from_last_clear && depth_stencil_backup->force_clear_index < 0)
 				depth_stencil_backup->force_clear_index = 0;
 
+			bool count_from_last_mismatch = (s_count_from_last_clear > 0) != (depth_stencil_backup->force_clear_index < 0);
+
 			for (uint32_t clear_index = 1; clear_index <= last_clear_count; ++clear_index)
 			{
 				const clear_stats &clear_stats = info.last_frame_stats.clears[clear_index - 1];
@@ -1412,9 +1414,9 @@ static void draw_settings_overlay(effect_runtime *runtime)
 				uint32_t force_clear_index_in = depth_stencil_backup->get_force_clear_index();
 
 				if (bool value = (force_clear_index_in == clear_index);
-					ImGui::Checkbox(label, &value))
+					ImGui::Checkbox(label, &value) || (value && count_from_last_mismatch))
 				{
-					depth_stencil_backup->set_force_clear_index(s_count_from_last_clear > 0, clear_index);
+					depth_stencil_backup->set_force_clear_index(s_count_from_last_clear > 0, value ? clear_index : 0);
 					reshade::set_config_value(nullptr, "DEPTH", "DepthCopyAtClearIndex", depth_stencil_backup->force_clear_index);
 				}
 
