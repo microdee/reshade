@@ -1397,6 +1397,12 @@ static void draw_settings_overlay(effect_runtime *runtime)
 				continue;
 
 			uint32_t last_clear_count = static_cast<uint32_t>(info.last_frame_stats.clears.size());
+
+			// In case we've just turned off counting from last clear but depth_stencil_backup is still set to do that
+			// reset force_clear_index to 0
+			if (!s_count_from_last_clear && depth_stencil_backup->force_clear_index < 0)
+				depth_stencil_backup->force_clear_index = 0;
+
 			for (uint32_t clear_index = 1; clear_index <= last_clear_count; ++clear_index)
 			{
 				const clear_stats &clear_stats = info.last_frame_stats.clears[clear_index - 1];
